@@ -52,6 +52,17 @@ records.forEach(r=>{
     bibliography+=`. - бр. ${r.issue}`
     bibliography+=` (${r.year})`
     bibliography+=`, с. ${r.pages_art}\n`
+
+    //next 2 cases check array length becaause there can be multiple values
+    // if there is abstract
+    if (r.abstract.length>0){
+      bibliography+=`Съдържа: ${r.abstract}\n`
+    }
+
+    //if there is see_also references
+    if (r.see_also.length>0){
+      bibliography+=`Вж. и: ${r.see_also}`
+    }
 })
 output.textContent=bibliography;
 
@@ -59,10 +70,10 @@ output.textContent=bibliography;
 
 
 
-//transform bibtex data into objects
-function bibtexRawToObjectsArray (bibtexData){
+// transform bibtex data into objects
+function bibtexRawToObjectsArray(bibtexData) {
 
-   // 1. Split records safely
+  // 1. Split records safely
   const rawRecords = bibtexData
     .split(/(?=@book\s*{)/i)
     .map(r => r.trim())
@@ -76,8 +87,10 @@ function bibtexRawToObjectsArray (bibtexData){
     "heading",
     "source",
     "pages",
-    "pages_art", 
-    "issue"
+    "pages_art",
+    "issue",
+    "abstract",
+    "see_also"
   ];
 
   // 3. Parse each record
@@ -87,17 +100,18 @@ function bibtexRawToObjectsArray (bibtexData){
     fields.forEach(field => {
       const regex = new RegExp(
         field + "\\s*=\\s*{([\\s\\S]*?)}",
-        "i"
+        "gi" // GLOBAL + case-insensitive
       );
-      const match = record.match(regex);
-      if (match) {
-        obj[field] = match[1].trim();
+
+      const matches = [...record.matchAll(regex)];
+
+      if (matches.length) {
+        obj[field] = matches.map(m => m[1].trim());
+      } else {
+        obj[field] = []; // always an array
       }
     });
 
-
-
     return obj;
   });
-  
 }
