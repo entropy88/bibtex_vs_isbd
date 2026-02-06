@@ -40,10 +40,13 @@ records_count.textContent=`${records.length} източника`
 //display the records as text. first we do the articles
 let bibliography="";
 records.forEach(r=>{
+  //check record type and append value
+  bibliography+=checkRecordType(r);
+  bibliography+='\n'
     //see what we extract
     console.log(r)
     //this handles missing author
-    if (r.author){
+    if (r.author.length>0){
         bibliography+=`${r.author}. `
     }
     
@@ -56,18 +59,37 @@ records.forEach(r=>{
     //next 2 cases check array length becaause there can be multiple values
     // if there is abstract
     if (r.abstract.length>0){
-      bibliography+=`Съдържа: ${r.abstract}\n`
+      //iterate through abstract array
+      r.abstract.forEach(a=>{
+        bibliography+=` ${a}\n`
+      })
+      
     }
 
     //if there is see_also references
     if (r.see_also.length>0){
-      bibliography+=`Вж. и: ${r.see_also}`
+      //iterate through references 
+      bibliography+=`Вж. и`
+      r.see_also.forEach(sa=>{
+         bibliography+=`${sa}\n`
+      })
+     
     }
+    //space out records
+    bibliography+=`\n`
 })
 output.textContent=bibliography;
 
 }
 
+//check if the record is an article or other, based on used pages field, returns a literal
+function checkRecordType(record){
+  if (record.pages_art.length>0){
+    return "Статия"
+  } else {
+    return "Книга"
+  }
+}
 
 
 // transform bibtex data into objects
