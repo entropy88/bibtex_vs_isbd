@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("bibtexFile");
   const output = document.getElementById("output");
-  const records_count=document.getElementById("records_count")
+  const records_count = document.getElementById("records_count")
 
   //on file selected load content
   input.addEventListener("change", () => {
@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.onload = () => {
       // Display raw text safely
       formISBD(reader.result)
-      
+
     };
 
     reader.onerror = () => {
@@ -26,69 +26,112 @@ document.addEventListener("DOMContentLoaded", () => {
 
 //get data and parse it
 //so far it only displays raw
-function formISBD(bibtexData){
+function formISBD(bibtexData) {
 
 
 
-//get the array of objects
-let records=bibtexRawToObjectsArray(bibtexData);
+  //get the array of objects
+  let records = bibtexRawToObjectsArray(bibtexData);
 
-//display count
-records_count.textContent=`${records.length} източника`
+  //display count
+  records_count.textContent = `${records.length} източника`
 
 
-//display the records as text. first we do the articles
-let bibliography="";
-records.forEach(r=>{
-  //check record type and append value
-  bibliography+=checkRecordType(r);
-  bibliography+='\n'
-    //see what we extract
-    console.log(r)
-    //this handles missing author
-    if (r.author.length>0){
-        bibliography+=`${r.author}. `
-    }
+  //display the records as text. first we do the articles
+  let bibliography = "";
+  records.forEach(r => {
+    //check record type and append value
+    bibliography += checkRecordType(r);
     
-    bibliography+=`${r.title}`
-    bibliography+=`. - В: ${r.source}`
-    bibliography+=`. - бр. ${r.issue}`
-    bibliography+=` (${r.year})`
-    bibliography+=`, с. ${r.pages_art}\n`
-
-    //next 2 cases check array length becaause there can be multiple values
-    // if there is abstract
-    if (r.abstract.length>0){
-      //iterate through abstract array
-      r.abstract.forEach(a=>{
-        bibliography+=` ${a}\n`
-      })
-      
-    }
-
-    //if there is see_also references
-    if (r.see_also.length>0){
-      //iterate through references 
-      bibliography+=`Вж. и`
-      r.see_also.forEach(sa=>{
-         bibliography+=`${sa}\n`
-      })
-     
-    }
-    //space out records
-    bibliography+=`\n`
-})
-output.textContent=bibliography;
-
+  })
 }
 
 //check if the record is an article or other, based on used pages field, returns a literal
-function checkRecordType(record){
-  if (record.pages_art.length>0){
+function checkRecordType(record) {
+  if (record.pages_art.length > 0) {
+    record.record_type = "Статия"
+    articleIsbd(record);
     return "Статия"
   } else {
+    record.record_type = "Книга"
+    bookIsbd(record);
     return "Книга"
   }
+}
+
+function bookIsbd(record) {
+  console.log('trigegr book isbd')
+  console.log(record)
+  let recordP = document.createElement('p');
+  let recordContent = record.record_type;
+  recordContent+='\n'
+  //title
+  recordContent+=record.title;
+  //authors
+  if (record.author.length>0){
+    recordContent+="/";
+    record.author.forEach(a=>{
+      recordContent+=` ${a}; `
+    })
+  }
+  //add place
+   if (record.address.length>0){
+    recordContent+=`. ${record.address}`
+   }
+   //add publisher
+   if (record.publisher.length>0){
+    recordContent+=`: ${record.publisher}`
+   }
+  
+  recordP.textContent=recordContent;
+  output.appendChild(recordP)
+}
+
+function articleIsbd(record) {
+  console.log('trigger article isbd')
+
+  //create a paragraph containing the record
+  let recordP = document.createElement('p');
+  recordContent = '';
+
+  recordContent += '\n'
+  //see what we extract
+  console.log(record)
+  //this handles missing author
+  if (record.author.length > 0) {
+    recordContent += `${record.author}. `
+  }
+
+  recordContent += `${record.title}`
+  recordContent += `. - В: ${record.source}`
+  recordContent += `. - бр. ${record.issue}`
+  recordContent += ` (${record.year})`
+  recordContent += `, с. ${record.pages_art}\n`
+
+  //next 2 cases check array length becaause there can be multiple values
+  // if there is abstract
+  if (record.abstract.length > 0) {
+    //iterate through abstract array
+    record.abstract.forEach(a => {
+      recordContent += ` ${a}\n`
+    })
+
+  }
+
+  //if there is see_also references
+  if (record.see_also.length > 0) {
+    //iterate through references 
+    recordContent += `Вж. и`
+    record.see_also.forEach(sa => {
+      recordContent += `${sa}\n`
+    })
+
+  }
+
+  recordP.textContent = recordContent;
+  output.appendChild(recordP);
+
+
 }
 
 
@@ -112,10 +155,12 @@ function bibtexRawToObjectsArray(bibtexData) {
     "pages_art",
     "issue",
     "abstract",
-    "see_also"
+    "see_also",
+    "address", 
+    "publisher"
   ];
 
-  // 3. Parse each record
+  // 3. Parse each record to object
   return rawRecords.map(record => {
     const obj = {};
 
