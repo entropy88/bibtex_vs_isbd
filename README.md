@@ -8,6 +8,9 @@ exports modified bibtex data to formatted html
 -	За книги: 300$а експортирано като pages
 - Анотация: 520$а експортирано като abstract
 - Вж. и: 588$а експортирано като see_also
+- Илюстрaции: 300$b експортирано като illustrations
+- Сигнатура: 852$c експортирано като signature
+
 
 
 
