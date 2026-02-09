@@ -64,7 +64,10 @@ function bookIsbd(record) {
   console.log(record)
   let recordP = document.createElement('p');
   let recordContent = record.record_type;
+
   recordContent+='\n'
+  //signature
+  recordContent+=`${record.signature}\n`
   //title
   recordContent+=record.title;
   //authors
@@ -81,6 +84,18 @@ function bookIsbd(record) {
    //add publisher
    if (record.publisher.length>0){
     recordContent+=`: ${record.publisher}`
+   }
+   //add year
+   if (record.year.length>0){
+    recordContent+=`, ${record. year}`
+   }
+   //add pages
+   if (record.pages.length>0){
+    recordContent+= ` . - ${record.pages[0]}`
+   }
+   //add illustrations
+   if (record.illustrations.length>0){
+    recordContent+=` : ${record.illustrations}`
    }
   
   recordP.textContent=recordContent;
@@ -106,7 +121,12 @@ function articleIsbd(record) {
   recordContent += `. - В: ${record.source}`
   recordContent += `. - бр. ${record.issue}`
   recordContent += ` (${record.year})`
-  recordContent += `, с. ${record.pages_art}\n`
+  recordContent += `, с. ${record.pages_art}`
+   //add illustrations
+   if (record.illustrations.length>0){
+    recordContent+=` : ${record.illustrations}`
+   }
+  recordContent+='\n'
 
   //next 2 cases check array length becaause there can be multiple values
   // if there is abstract
@@ -157,7 +177,9 @@ function bibtexRawToObjectsArray(bibtexData) {
     "abstract",
     "see_also",
     "address", 
-    "publisher"
+    "publisher",
+    "illustrations",
+    "signature"
   ];
 
   // 3. Parse each record to object
